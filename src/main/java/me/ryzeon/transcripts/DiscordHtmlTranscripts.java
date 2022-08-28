@@ -6,20 +6,19 @@ import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
 
-import java.awt.*;
-import java.io.*;
-import java.net.URL;;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
-import java.util.List;
 import java.util.stream.Collectors;
 
+;
+
 /**
- * Created by Ryzeon
- * Project: discord-html-transcripts
- * Date: 2/12/21 @ 00:32
- * Twitter: @Ryzeon_ 😎
- * Github: github.ryzeon.me
+ * Created by Ryzeon, edited by Sky for JDA 5 & new Discord API.
  */
 public class DiscordHtmlTranscripts {
 
@@ -35,12 +34,12 @@ public class DiscordHtmlTranscripts {
         return instance;
     }
 
-    public void createTranscript(TextChannel channel) throws IOException {
-        createTranscript(channel, null);
+    public InputStream createTranscript(MessageChannel channel) throws IOException {
+        return createTranscript(channel, null);
     }
 
-    public void createTranscript(TextChannel channel, String fileName) throws IOException {
-        channel.sendFile(generateFromMessages(channel.getIterableHistory().stream().collect(Collectors.toList())), fileName != null ? fileName : "transcript.html").queue();
+    public InputStream createTranscript(MessageChannel channel, String fileName) throws IOException {
+        return generateFromMessages(channel.getIterableHistory().stream().collect(Collectors.toList()));
     }
 
     public InputStream generateFromMessages(Collection<Message> messages) throws IOException {
@@ -48,14 +47,21 @@ public class DiscordHtmlTranscripts {
         if (messages.isEmpty()) {
             throw new IllegalArgumentException("No messages to generate a transcript from");
         }
-        TextChannel channel = messages.iterator().next().getTextChannel();
+        Channel channel = messages.iterator().next().getChannel();
         Document document = Jsoup.parse(htmlTemplate, "UTF-8");
         document.outputSettings().indentAmount(0).prettyPrint(true);
         document.getElementsByClass("preamble__guild-icon")
-                .first().attr("src", channel.getGuild().getIconUrl()); // set guild icon
+                .first().attr("src", Objects.requireNonNull(channel.getType().equals(ChannelType.PRIVATE)
+                        ? ((PrivateChannel) channel).getUser().getAvatarUrl()
+                        : ((GuildChannel) channel).getGuild().getIconUrl())
+                ); // set guild icon
 
         document.getElementById("transcriptTitle").text(channel.getName()); // set title
-        document.getElementById("guildname").text(channel.getGuild().getName()); // set guild name
+        document.getElementById("guildname").text(
+                channel.getType().equals(ChannelType.PRIVATE)
+                        ? ((PrivateChannel) channel).getUser().getName()
+                        : ((GuildChannel) channel).getGuild().getName()
+        ); // set guild name
         document.getElementById("ticketname").text(channel.getName()); // set channel name
 
         Element chatLog = document.getElementById("chatlog"); // chat log
@@ -79,27 +85,22 @@ public class DiscordHtmlTranscripts {
 
                 var referenceMessage = message.getReferencedMessage();
                 User author = referenceMessage.getAuthor();
-                Member member = channel.getGuild().getMember(author);
-                var color = Formatter.toHex(Objects.requireNonNull(member.getColor()));
+                final String color;
+                if (channel.getType().equals(ChannelType.PRIVATE))
+                    color = "#FFFFFF";
+                else
+                    color = Formatter.toHex(Objects.requireNonNull(((GuildChannel) channel).getGuild().getMember(author).getColor()));
 
                 //        System.out.println("REFERENCE MSG " + referenceMessage.getContentDisplay());
-                reference.html("<img class=\"chatlog__reference-avatar\" src=\""
-                        + author.getAvatarUrl() + "\" alt=\"Avatar\" loading=\"lazy\">" +
-                        "<span class=\"chatlog__reference-name\" title=\"" + author.getName()
-                        + "\" style=\"color: " + color + "\">" + author.getName() + "\"</span>" +
-                        "<div class=\"chatlog__reference-content\">" +
-                        " <span class=\"chatlog__reference-link\" onclick=\"scrollToMessage(event, '"
-                        + referenceMessage.getId() + "')\">" +
-                        "<em>" +
-                        referenceMessage.getContentDisplay() != null
-                        ? referenceMessage.getContentDisplay().length() > 42
-                        ? referenceMessage.getContentDisplay().substring(0, 42)
-                        + "..."
-                        : referenceMessage.getContentDisplay()
-                        : "Click to see attachment" +
-                        "</em>" +
-                        "</span>" +
-                        "</div>");
+                author.getAvatarUrl();
+                author.getName();
+                author.getName();
+                referenceMessage.getId();
+                referenceMessage.getContentDisplay();
+                reference.html(referenceMessage.getContentDisplay().length() > 42
+                ? referenceMessage.getContentDisplay().substring(0, 42)
+                + "..."
+                : referenceMessage.getContentDisplay());
 
                 messageGroup.appendChild(referenceSymbol);
                 messageGroup.appendChild(reference);

@@ -6,11 +6,7 @@ import java.util.regex.Pattern;
 import lombok.experimental.UtilityClass;
 
 /**
- * Created by Ryzeon
- * Project: discord-html-transcripts
- * Date: 2/12/21 @ 00:32
- * Twitter: @Ryzeon_ 😎
- * Github: github.ryzeon.me
+ * Created by Ryzeon, edited by Sky for JDA 5 & new Discord API.
  */
 @UtilityClass
 public class Formatter {
