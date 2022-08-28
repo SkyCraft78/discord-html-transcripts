@@ -1,6 +1,5 @@
 plugins {
     id 'java'
-    id "com.github.johnrengelman.shadow" version "7.1.2"
 }
 
 group 'me.ryzeon.html'
@@ -12,7 +11,7 @@ repositories {
 }
 
 dependencies {
-    shadow 'org.projectlombok:lombok:1.18.24'
-    shadow 'net.dv8tion:JDA:5.0.0-alpha.18'
-    implementation 'org.jsoup:jsoup:1.15.2'
+    implementation 'org.projectlombok:lombok:1.18.24'
+    implementation 'net.dv8tion:JDA:5.0.0-alpha.18'
+    compileOnly 'org.jsoup:jsoup:1.15.2'
 }
