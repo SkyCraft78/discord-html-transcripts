@@ -1,0 +1,17 @@
+plugins {
+    id 'java'
+}
+
+group 'me.ryzeon.html'
+version '1.0-SNAPSHOT'
+
+repositories {
+    mavenCentral()
+    maven { url = 'https://m2.dv8tion.net/releases' }
+}
+
+dependencies {
+    compileOnly 'org.projectlombok:lombok:1.18.24'
+    compileOnly 'net.dv8tion:JDA:5.0.0-alpha.18'
+    compileOnly 'org.jsoup:jsoup:1.15.2'
+}

@@ -1,6 +1,5 @@
 package me.ryzeon.transcripts;
 
-import lombok.var;
 import net.dv8tion.jda.api.entities.*;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
